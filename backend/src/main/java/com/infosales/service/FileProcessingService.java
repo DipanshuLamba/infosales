@@ -18,22 +18,39 @@ public class FileProcessingService {
     public List<Map<String, String>> readFile(MultipartFile file) throws Exception {
         String filename = file.getOriginalFilename();
 
-        if (filename == null || (!filename.endsWith(".csv") && !filename.endsWith(".xlsx"))) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("Uploaded file is empty.");
+        }
+
+        if (filename == null || (!filename.toLowerCase().endsWith(".csv") && !filename.toLowerCase().endsWith(".xlsx"))) {
             throw new IllegalArgumentException("Only CSV and XLSX files are allowed.");
         }
 
-        if (filename.endsWith(".csv")) {
-            return readCsv(file);
+        List<Map<String, String>> rows;
+
+        if (filename.toLowerCase().endsWith(".csv")) {
+            rows = readCsv(file);
         } else {
-            return readExcel(file);
+            rows = readExcel(file);
         }
+
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("The uploaded file contains no data rows.");
+        }
+
+        validateRequiredColumns(rows.get(0));
+
+        return rows;
     }
 
     private List<Map<String, String>> readCsv(MultipartFile file) throws Exception {
         List<Map<String, String>> rows = new ArrayList<>();
 
         Iterable<CSVRecord> records = CSVFormat.DEFAULT
-                .withFirstRecordAsHeader()
+                .builder()
+                .setHeader()
+                .setSkipHeaderRecord(true)
+                .build()
                 .parse(new InputStreamReader(file.getInputStream()));
 
         for (CSVRecord record : records) {
@@ -54,10 +71,15 @@ public class FileProcessingService {
         Sheet sheet = workbook.getSheetAt(0);
 
         Row headerRow = sheet.getRow(0);
+        if (headerRow == null) {
+            workbook.close();
+            throw new IllegalArgumentException("Excel file is missing a header row.");
+        }
+
         List<String> headers = new ArrayList<>();
 
         for (Cell cell : headerRow) {
-            headers.add(cell.getStringCellValue());
+            headers.add(cell.getStringCellValue().trim());
         }
 
         for (int i = 1; i <= sheet.getLastRowNum(); i++) {
@@ -76,6 +98,16 @@ public class FileProcessingService {
 
         workbook.close();
         return rows;
+    }
+
+    private void validateRequiredColumns(Map<String, String> sampleRow) {
+        List<String> requiredColumns = List.of("Product_Category", "Region", "Units_Sold", "Revenue");
+
+        for (String column : requiredColumns) {
+            if (!sampleRow.containsKey(column)) {
+                throw new IllegalArgumentException("Missing required column: " + column);
+            }
+        }
     }
 
     private String getCellValueAsString(Cell cell) {

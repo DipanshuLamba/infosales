@@ -13,7 +13,8 @@ import java.util.Map;
 @Service
 public class AiService {
 
-    private static final String API_KEY = "AIzaSyDK9wc0qow4onE1EM4GkYdMqiWuXkcQKNw";
+    @org.springframework.beans.factory.annotation.Value("${gemini.api.key}")
+    private String apiKey;
     private static final String MODEL = "gemini-2.5-flash";
 
     public String generateSummary(AnalysisResult result) {
@@ -47,7 +48,7 @@ public class AiService {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.set("x-goog-api-key", API_KEY);
+            headers.set("x-goog-api-key", apiKey);
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
