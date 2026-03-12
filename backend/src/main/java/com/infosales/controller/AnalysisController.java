@@ -19,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api")
 @Validated
-@CrossOrigin(origins = "*")
 public class AnalysisController {
 
     private final FileProcessingService fileProcessingService;
@@ -49,8 +48,14 @@ public class AnalysisController {
         AnalysisResult result = analysisService.analyzeSalesData(rows);
         String summary = aiService.generateSummary(result);
 
-        emailService.sendSummaryEmail(email, summary);
+        String finalMessage = summary;
 
-        return new SalesSummaryResponse(summary, result);
+        try {
+            emailService.sendSummaryEmail(email, summary);
+        } catch (Exception e) {
+            finalMessage = summary + "\n\nNote: Email delivery is unavailable on the current cloud free tier. The summary was generated successfully.";
+        }
+
+        return new SalesSummaryResponse(finalMessage, result);
     }
 }
