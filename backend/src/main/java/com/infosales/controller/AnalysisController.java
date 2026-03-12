@@ -52,8 +52,9 @@ public class AnalysisController {
 
         try {
             emailService.sendSummaryEmail(email, summary);
+            finalMessage = summary + "\n\nEmail sent successfully.";
         } catch (Exception e) {
-            finalMessage = summary + "\n\nNote: Email delivery is unavailable on the current cloud free tier. The summary was generated successfully.";
+            finalMessage = summary + "\n\nNote: Summary generated successfully, but email delivery is unavailable on the current Render free tier because SMTP is restricted.";
         }
 
         return new SalesSummaryResponse(finalMessage, result);

@@ -35,13 +35,6 @@ public class GlobalExceptionHandler {
         ));
     }
 
-    @ExceptionHandler(MailException.class)
-    public ResponseEntity<Map<String, String>> handleMail(MailException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
-                "message", "Failed to send email."
-        ));
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGeneral(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
