@@ -1,1 +1,13 @@
+com\infosales\service\FileProcessingService.class
+com\infosales\controller\HealthController.class
+com\infosales\service\AiService.class
+com\infosales\InfoSalesApplication.class
+com\infosales\model\AnalysisResult.class
+com\infosales\config\CorsConfig$1.class
+com\infosales\config\CorsConfig.class
+com\infosales\model\SalesSummaryResponse.class
 com\infosales\service\FileProcessingService$1.class
+com\infosales\config\GlobalExceptionHandler.class
+com\infosales\service\EmailService.class
+com\infosales\controller\AnalysisController.class
+com\infosales\service\AnalysisService.class
