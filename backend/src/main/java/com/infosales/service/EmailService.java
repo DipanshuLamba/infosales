@@ -1,31 +1,29 @@
 package com.infosales.service;
 
-import com.resend.Resend;
-import com.resend.services.emails.model.CreateEmailOptions;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
-    private final Resend resend;
+    private final JavaMailSender mailSender;
 
-    public EmailService(@Value("${RESEND_API_KEY}") String apiKey) {
-        this.resend = new Resend(apiKey);
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
+    public EmailService(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
     }
 
     public void sendSummaryEmail(String toEmail, String summary) {
-        CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Acme <onboarding@resend.dev>")
-                .to(toEmail)
-                .subject("Your Sales Analysis Summary")
-                .html("<h2>Sales Summary</h2><p>" + summary + "</p>")
-                .build();
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(fromEmail);
+        message.setTo(toEmail);
+        message.setSubject("InfoSales Executive Summary");
+        message.setText(summary);
 
-        try {
-            resend.emails().send(params);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to send email via Resend", e);
-        }
+        mailSender.send(message);
     }
 }
